@@ -1,0 +1,2 @@
+S90.acpiwakeup usr/share/vdr/shutdown-hooks/
+vdr-addon-acpiwakeup.conf etc/vdr/

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+ARGUMENTS=""
+
+while [ $# -ne 0  ]
+do
+    if [ "$1" = "-d" ]; then
+        shift
+        DATE="$1"
+        if echo "$DATE" | grep -q '^[0-9][0-9]:' ; then
+            DATE="`echo "$FAKEDATETIME" | sed 's/\(.*\) [0-9][0-9]:.*/\1/'` $DATE"
+        fi
+    else
+        ARGUMENTS="$ARGUMENTS $1"
+    fi
+    shift
+done
+
+[ -z "$DATE" ] && DATE="$FAKEDATETIME"
+
+/bin/date -d "$DATE" $ARGUMENTS

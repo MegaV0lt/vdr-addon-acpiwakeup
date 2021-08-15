@@ -1,0 +1,87 @@
+vdr-addon-acpiwakeup (0.0.10-1gda1) jaunty; urgency=low
+
+  * rebuild for jaunty
+
+ -- Gerald Dachs <gda@dachsweb.de>  Fri, 10 Apr 2009 22:52:44 +0200
+
+vdr-addon-acpiwakeup (0.0.10) unstable; urgency=low
+
+  * Fixed writing the wake up time to the wakeup file for the init script
+
+ -- Tobias Grimm <tg@e-tobi.net>  Tue, 10 Jun 2008 22:45:14 +0200
+
+vdr-addon-acpiwakeup (0.0.9) unstable; urgency=low
+
+  * Fixed bug causing WAKEALARM to be set 2 hours too early, when
+    UTC time is used (as reported here:
+    http://www.vdr-portal.de/board/thread.php?threadid=77166)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 08 Jun 2008 00:10:08 +0200
+
+vdr-addon-acpiwakeup (0.0.8) unstable; urgency=low
+
+  * Made test script dash compatible
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 18 May 2008 00:52:24 +0200
+
+vdr-addon-acpiwakeup (0.0.7) unstable; urgency=low
+
+  * Incorporated suggestions by Andreas Schaefers
+    - Replaced the minimum time a timer must lie in the future from
+      5 minutes to ACPI_START_AHEAD
+    - Use ACPI_REGULAR_DAYS as days of week
+  * Incorporated suggestions by Gerald Dachs
+    - Where /proc/acpi/wakeup is not available, try /sys/class/rtc/rtc0/wakealarm
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 11 May 2008 23:21:44 +0200
+
+vdr-addon-acpiwakeup (0.0.6) unstable; urgency=low
+
+  * Applied a fix from Malte Forkel regarding an issue with the regular wake up
+    time
+
+ -- Tobias Grimm <tg@e-tobi.net>  Thu, 13 Sep 2007 20:15:54 +0200
+
+vdr-addon-acpiwakeup (0.0.5) unstable; urgency=low
+
+  * Added an init script that will set the ACPI time on runlevel 0 (halt) after
+    the hwclock init script was called to synchronize the hwclock. This should
+    avoid the need to set hwclockaccess=no, because hwclock may reset the ACPI
+    alarm time.    
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun,  6 May 2007 21:56:18 +0200
+
+vdr-addon-acpiwakeup (0.0.4) unstable; urgency=low
+
+  * Changed architecture to "all"
+
+ -- Tobias Grimm <tg@e-tobi.net>  Thu,  2 Nov 2006 08:48:09 +0100
+
+vdr-addon-acpiwakeup (0.0.3) unstable; urgency=low
+
+  * Check UTC setting from /etc/default/rcS and convert wakeup time to UTC
+    if needed
+  * Double-set time, as some boards seem to need this
+  * Replaced tabs with spaces
+
+ -- Tobias Grimm <tg@e-tobi.net>  Thu, 30 Jun 2005 22:47:12 +0200
+
+vdr-addon-acpiwakeup (0.0.2) unstable; urgency=low
+
+  * shutdown hook is now named S90.acpiwakeup
+  * corrected conf file loading 
+  * deactivate wakeup by default
+  * Anpassung an VDR 1.2.6-27
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 26 Sep 2004 18:30:00 +0200
+
+vdr-addon-acpiwakeup (0.0.1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Tobias Grimm <tg@e-tobi.net>  Fri, 23 Apr 2004 10:00:00 +0200
+
+Local variables:
+mode: debian-changelog
+End:
+

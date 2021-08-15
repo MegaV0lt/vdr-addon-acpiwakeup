@@ -1,0 +1,117 @@
+#!/bin/sh
+
+. ./shellunit.sh
+. ./testhelpers.sh
+
+setup()
+{
+    rm -f alarm
+    touch alarm
+    rm -f wakeup
+    touch wakeup
+}
+
+teardown()
+{
+    rm -f alarm
+    rm -f wakeup
+}
+
+export ACPI_ENABLED=yes
+export ACPI_ALARM=./alarm
+export WAKEUP_FILE=./wakeup
+export FAKEDATETIME="2008-01-01 00:00:00"
+export TZ="Europe/Berlin"
+
+echo "Running Tests:"
+
+start_test "Should not do anything when disabled"
+    ACPI_ENABLED=no \
+      sh ./testwakeup `wakeuptime '2008-05-11 20:00:00'`
+    expect_wakeup_time ""
+end_test
+
+start_test "Should disable wakeup when no timer is set"
+    FAKEDATETIME="2008-01-01 01:00:00"
+    sh ./testwakeup `wakeuptime '@0'`
+    expect_wakeup_time "2008-01-01 00:00:01"
+end_test
+
+start_test "Should wake up ACPI_START_AHEAD minutes ahead"
+    sh ./testwakeup `wakeuptime '2008-05-11 20:00:00'`
+    expect_wakeup_time "2008-05-11 19:55:00"
+end_test
+
+start_test "Should set the time as UTC when system uses UTC"
+    UTC=yes sh ./testwakeup `wakeuptime '2008-06-11 20:00:00'`
+    expect_wakeup_time "2008-06-11 17:55:00"
+end_test
+
+start_test "Should wake up daily at 03:00 today"
+    ACPI_REGULAR_DAYS="1 2 3 4 5 6 7" \
+    ACPI_REGULAR_TIME="03:00" \
+      sh ./testwakeup `wakeuptime '2008-05-12 20:00:00'`
+    expect_wakeup_time "2008-01-01 02:55:00"
+end_test
+
+start_test "Should wake up daily at 01:00 tomorrow"
+    FAKEDATETIME="2008-01-01 02:00:00" \
+    ACPI_REGULAR_DAYS="1 2 3 4 5 6 7" \
+    ACPI_REGULAR_TIME="01:00" \
+      sh ./testwakeup `wakeuptime '2008-05-12 20:00:00'`
+    expect_wakeup_time "2008-01-02 00:55:00"
+end_test
+
+start_test "Should wake up on Monday 2:00 when shutting down on Sunday 01:00"
+    # 2008-05-11 = Sunday
+    FAKEDATETIME="2008-05-11 01:00:00" \
+    ACPI_REGULAR_DAYS="1 4" \
+    ACPI_REGULAR_TIME="02:00" \
+      sh ./testwakeup `wakeuptime '@0'`
+    expect_wakeup_time "2008-05-12 01:55:00"
+end_test
+
+start_test "Should wake up on Monday 2:00 when shutting down on Monday 01:00"
+    # 2008-05-11 = Sunday
+    FAKEDATETIME="2008-05-11 01:00:00" \
+    ACPI_REGULAR_DAYS="1 4" \
+    ACPI_REGULAR_TIME="02:00" \
+      sh ./testwakeup `wakeuptime '@0'`
+    expect_wakeup_time "2008-05-12 01:55:00"
+end_test
+
+start_test "Should wake up on Thursday 2:00 when shutting down on Tuesday 01:00"
+    # 2008-05-11 = Sunday
+    FAKEDATETIME="2008-05-13 01:00:00" \
+    ACPI_REGULAR_DAYS="1 4" \
+    ACPI_REGULAR_TIME="02:00" \
+      sh ./testwakeup `wakeuptime '@0'`
+    expect_wakeup_time "2008-05-15 01:55:00"
+end_test
+
+start_test "Should write seconds since 1970-01-01 to WAKEALARM"
+    ACPI_ALARM=/does-not-exist \
+    WAKEALARM=./alarm \
+      sh ./testwakeup `wakeuptime '2008-05-11 20:00:00'`
+    assert_equals `date -d '2008-05-11 19:55:00' +%s` `cat ./alarm`
+end_test
+
+start_test "Should set the time as UTC when system uses UTC and WAKEALERM"
+    #
+    # Reveals bug reported here: 
+    #   http://www.vdr-portal.de/board/thread.php?threadid=77166
+    # 
+    ACPI_ALARM=/does-not-exist \
+    WAKEALARM=./alarm \
+    UTC=yes \
+      sh ./testwakeup `wakeuptime '2008-06-11 20:00:00'`
+    assert_equals `date -d '2008-06-11 17:55:00 UTC' +%s` `cat ./alarm`
+end_test
+
+start_test "Should write the wakeup time to the wakeup file"
+    UTC=yes \
+      sh ./testwakeup `wakeuptime '2008-05-11 20:00:00'`
+    expect_wakeup_file "2008-05-11 17:55:00"
+end_test
+
+exit $FAILURE
