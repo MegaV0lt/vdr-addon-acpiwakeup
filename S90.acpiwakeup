@@ -54,40 +54,17 @@ ResetWakeupTime_RTC()
     return 1
 }
 
-get_utc_offset() {
-    # if the RTC runs in local time return an UTC offset for the timestamp
-    # given as the first argument
-    local -i utc_offset=0
-    # /etc/ajdtime is created by executing "timedatectl set-local-rtc 1"
-    # please note that this is generally considered a bad idea...
-    if grep -q LOCAL /etc/adjtime >/dev/null 2>&1
-    then
-	local utc_offset_raw
-	utc_offset_raw="$(date -d@"$1" +%z)"
-	# date returns something like "+0100" for an offset of one hour
-	# we need to extract the hours and minutes ...
-	local offset_hours=${utc_offset_raw:1:2}
-	local offset_minutes=${utc_offset_raw:3:4}
-        # ... and convert them into total seconds
-	utc_offset="((offset_hours * 60) + offset_minutes) * 60"
-    fi
-    echo "$utc_offset"
-}
-
 SetWakeupTime_RTC() {
     local -i ts="$1"
-    local -i UTC_OFFSET
-    UTC_OFFSET=$(get_utc_offset "$ts")
-    [ "$UTC_OFFSET" -gt 0 ] && "LOG" "SetWakeupTime_RTC: RTC is not set to UTC, required UTC_OFFSET is $UTC_OFFSET seconds"
-    ts=$(( ts + UTC_OFFSET ))
 
     if [ -w $WAKEALARM ] && ResetWakeupTime; then
             $LOG "Writing $ts to $WAKEALARM"
-            echo "$ts" > $WAKEALARM 2>/dev/null && return 0
+            # we use a relative time because of a bug with absolute
+            # time and local vs. UTC timing, and avoid the handling of offsets
+            echo "+$(( ts - $(date +%s) ))" > $WAKEALARM 2>/dev/null && return 0
     fi
     return 1
 }
-
 
 ResetWakeupTime()
 {
