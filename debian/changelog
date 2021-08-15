@@ -1,3 +1,110 @@
+vdr-addon-acpiwakeup (0.0.10-11yavdr3~focal) focal; urgency=medium
+
+  * automatic rebuild
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Thu, 30 Apr 2020 12:41:42 +0200
+
+vdr-addon-acpiwakeup (0.0.10-11yavdr2~focal) focal; urgency=medium
+
+  * automatic rebuild
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Thu, 30 Apr 2020 09:10:18 +0200
+
+vdr-addon-acpiwakeup (0.0.10-11yavdr1~focal) focal; urgency=medium
+
+  * rebuild for focal
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Wed, 27 Nov 2019 20:43:44 +0100
+
+vdr-addon-acpiwakeup (0.0.10-11yavdr0~bionic) bionic; urgency=medium
+
+  * cleanup shellscript
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Wed, 25 Sep 2019 18:51:15 +0200
+
+vdr-addon-acpiwakeup (0.0.10-10yavdr0~bionic) bionic; urgency=medium
+
+  * Experimental feature: support RTC in local time 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Wed, 25 Sep 2019 18:41:27 +0200
+
+vdr-addon-acpiwakeup (0.0.10-9yavdr0~bionic) bionic; urgency=medium
+
+  * make shutdown-hook executable
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sat, 20 Jul 2019 13:36:35 +0200
+
+vdr-addon-acpiwakeup (0.0.10-8yavdr0~bionic) bionic; urgency=medium
+
+  * remove set -x from script 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sun, 07 Apr 2019 11:19:52 +0200
+
+vdr-addon-acpiwakeup (0.0.10-7yavdr0~bionic) bionic; urgency=medium
+
+  * cleanup shutdown-hook script 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sat, 06 Apr 2019 09:39:21 +0200
+
+vdr-addon-acpiwakeup (0.0.10-6yavdr0~bionic) bionic; urgency=medium
+
+  * fix error message in case rtc is not writable 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Thu, 14 Mar 2019 18:54:19 +0100
+
+vdr-addon-acpiwakeup (0.0.10-5yavdr0~bionic) bionic; urgency=medium
+
+  * remove functions for old kernel API 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sun, 04 Nov 2018 08:36:25 +0100
+
+vdr-addon-acpiwakeup (0.0.10-4yavdr0~bionic) bionic; urgency=medium
+
+  * fix debian/vdr-addon-acpiwakeup.init 
+    - use /sys/class/rtc/rtc0/wakealarm as default device. You can override
+      this path (as it has been possible before) by setting the variable ACPI_ALARM in
+      /etc/vdr/vdr-addon-acpiwakeup.conf
+    - do not write the wakeup time multiple times to the rtc instead first
+      reset the wakeup time to 0 and then write it once.
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Thu, 06 Sep 2018 07:13:06 +0000
+
+vdr-addon-acpiwakeup (0.0.10-2yavdr6~bionic) bionic; urgency=medium
+
+  * automatic rebuild
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Thu, 01 Mar 2018 08:53:40 +0000
+
+vdr-addon-acpiwakeup (0.0.10-2yavdr5~bionic) bionic; urgency=medium
+
+  * rebuild for bionic
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sat, 16 Dec 2017 19:04:20 +0000
+
+vdr-addon-acpiwakeup (0.0.10-2yavdr4~xenial) xenial; urgency=medium
+
+  * rebuild for xenial (let's see if it still works)
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Fri, 03 Nov 2017 20:37:34 +0100
+
+vdr-addon-acpiwakeup (0.0.10-2yavdr3~trusty) trusty; urgency=medium
+
+  * build for trusty thar
+
+ -- Alexander Grothe <seahawk1986@hotmail.com>  Wed, 11 Dec 2013 12:54:29 +0100
+
+vdr-addon-acpiwakeup (0.0.10-2yavdr2~precise) precise; urgency=medium
+
+  * backup old wakeup-timestamp to recognise acpi-wakeup for frontends
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Thu, 13 Sep 2012 10:53:30 +0200
+
+vdr-addon-acpiwakeup (0.0.10-2yavdr1~precise) precise; urgency=low
+
+  * oneiric migration
+
+ -- Holger Schvestka <hotzenplotz5@gmx.de>  Wed, 02 Mar 2011 23:19:06 +0100
+
 vdr-addon-acpiwakeup (0.0.10-1gda1) jaunty; urgency=low
 
   * rebuild for jaunty

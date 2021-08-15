@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# see: dh_installdeb(1)
+
+set -e
+
+case "$1" in
+
+  configure)
+    chmod +x /usr/share/vdr/shutdown-hooks/S90.acpiwakeup
+  ;;
+
+esac
+
+#DEBHELPER#
+
+exit 0

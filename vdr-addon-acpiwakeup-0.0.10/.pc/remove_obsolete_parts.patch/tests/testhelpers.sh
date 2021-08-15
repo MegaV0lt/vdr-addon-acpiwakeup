@@ -17,6 +17,6 @@ expect_wakeup_file()
 {
     local time
     time=`cat ./wakeup`
-    assert_equals "$(/bin/date -d "$1" +%s)" "$time"
+    assert_equals "$1" "$time"
     return $?
 }

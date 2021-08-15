@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Tobias Grimm <tg@e-tobi.net>
 Origin: ctvdr
 Bugs: mailto:pkg-vdr-dvb-devel@lists.alioth.debian.org
-Build-Depends: debhelper (>> 3.0.0)
+Build-Depends: debhelper (>> 3.0.0), tzdata
 Standards-Version: 3.5.2
 
 Package: vdr-addon-acpiwakeup
