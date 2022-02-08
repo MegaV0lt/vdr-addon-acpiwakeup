@@ -9,7 +9,10 @@ expect_wakeup_time()
 {
     local alarm
     alarm=`cat ./alarm`
-    assert_equals "$(/bin/date -d "$1" +%s)" "$alarm"
+    expected_ts=$(/bin/date -d "$1" +%s)
+    fake_ts=$(./date +%s)
+    offset=$(( expected_ts - fake_ts ))
+    assert_equals "+${offset}" "$alarm"
     return $?
 }
 
