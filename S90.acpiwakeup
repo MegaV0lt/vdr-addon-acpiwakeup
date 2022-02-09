@@ -58,10 +58,11 @@ SetWakeupTime_RTC() {
     local -i ts="$1"
 
     if [ -w $WAKEALARM ] && ResetWakeupTime; then
-            $LOG "Writing $ts to $WAKEALARM"
+            wakeup_offset="+$(( ts - $(date +%s) ))"
+            $LOG "Writing $wakeup_offset (for $ts) to $WAKEALARM"
             # we use a relative time because of a bug with absolute
             # time and local vs. UTC timing, and avoid the handling of offsets
-            echo "+$(( ts - $(date +%s) ))" > $WAKEALARM 2>/dev/null && return 0
+            echo "$wakeup_offset" > $WAKEALARM 2>/dev/null && return 0
     fi
     return 1
 }
