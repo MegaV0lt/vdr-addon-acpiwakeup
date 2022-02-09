@@ -1,3 +1,9 @@
+vdr-addon-acpiwakeup (0.0.12-0yavdr0~focal) focal; urgency=medium
+
+  * new upstream version 
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Wed, 09 Feb 2022 19:53:55 +0100
+
 vdr-addon-acpiwakeup (0.0.10-11yavdr3~focal) focal; urgency=medium
 
   * automatic rebuild
