@@ -9,18 +9,16 @@
 #
 
 if [ "$(basename "$0")" != "testwakeup" ] ; then
-    # read arguments for acpi-wakeup from conf-file
+    # Read arguments for acpi-wakeup from conf-file
     . /etc/vdr/vdr-addon-acpiwakeup.conf
     WAKEUP_FILE="/var/cache/vdr/acpiwakeup.time"
-
     LOG="logger -t vdr-addon-acpiwakeup "
 else
     WAKEUP_FILE=$WAKEUP_FILE
     LOG="nop"
 fi
 
-nop()
-{
+nop() {
     # No Operation
     echo -n ""
 }
@@ -34,20 +32,17 @@ nop()
 
 TIMER=$1
 
-AcpiError()
-{
+AcpiError() {
     $LOG "No writeable $WAKEALARM found. RTC needed!!!"
     echo "ABORT_MESSAGE=\"RTC not writable, shutdown aborted!\""
     exit 1
 }
 
 
-ResetWakeupTime_RTC()
-{
-    if [ -w $WAKEALARM ]; then
+ResetWakeupTime_RTC() {
+    if [ -w $WAKEALARM ] ; then
         $LOG "Writing 0 to $WAKEALARM"
-        echo 0 > $WAKEALARM &&
-        return 0
+        echo 0 > $WAKEALARM && return 0
     else
         $LOG "WAKEALARM $WAKEALARM not writable"
     fi
@@ -57,41 +52,35 @@ ResetWakeupTime_RTC()
 SetWakeupTime_RTC() {
     local -i ts="$1"
 
-    if [ -w $WAKEALARM ] && ResetWakeupTime; then
+    if [ -w $WAKEALARM ] && ResetWakeupTime ; then
             wakeup_offset="+$(( ts - $(date +%s) ))"
             $LOG "Writing $wakeup_offset (for $ts) to $WAKEALARM"
-            # we use a relative time because of a bug with absolute
+            # We use a relative time because of a bug with absolute
             # time and local vs. UTC timing, and avoid the handling of offsets
             echo "$wakeup_offset" > $WAKEALARM 2>/dev/null && return 0
     fi
     return 1
 }
 
-ResetWakeupTime()
-{
+ResetWakeupTime() {
     $LOG "Resetting ACPI alarm time"
-    ResetWakeupTime_RTC || \
-    AcpiError
+    ResetWakeupTime_RTC || AcpiError
 }
 
-SetWakeupTime()
-{
+SetWakeupTime() {
     $LOG "Try setting ACPI alarm time to: $(date -d@"$1") ($1)"
-    if SetWakeupTime_RTC "$1"
-    then
+    if SetWakeupTime_RTC "$1" ; then
         echo "$1" >"$WAKEUP_FILE"
     else
         # If the RTC did not accept the date, it might be to far in the future
         # see https://github.com/torvalds/linux/commit/6a6af3d04435adfdaab363624ec569a9b5d3973c
         # so we need to try waking up in less than a year, less than a month or less than a day
         dates=("now +1 year -1 min" "now +1 month -1 min" "now +1 week -1 min" "now +1 day -1 min")
-        for d in "${dates[@]}"
-        do
+        for d in "${dates[@]}" ; do
 	    new_date=$(date -d "$d" +%s)
             [ "$1" -lt "$new_date" ] && continue
 	    $LOG "RTC did not accept $1, try setting ACPI alarm time to: $(date -d@"$new_date") ($new_date)"
-            if SetWakeupTime_RTC "$new_date"
-            then
+            if SetWakeupTime_RTC "$new_date" ; then
                 # remember wakeup time for stop script
                 echo "$new_date" >"$WAKEUP_FILE"
                 return 0
@@ -101,22 +90,19 @@ SetWakeupTime()
     fi
 }
 
-IsRegularDayOfWeek()
-{
+IsRegularDayOfWeek() {
     local day
-    for day in $ACPI_REGULAR_DAYS
-    do
-        if [ "$day" = "$(date -d "@$1" +%u)" ]
-        then
+    for day in $ACPI_REGULAR_DAYS ; do
+        if [ "$day" = "$(date -d "@$1" +%u)" ] ; then
             return 0
         fi
     done
     return 1
 }
 
-if [ $ACPI_ENABLED = "yes" ]; then
-    # check if we should wake up before the next timer:
-    if [ "$ACPI_REGULAR_DAYS" != "0" ]; then
+if [ $ACPI_ENABLED = "yes" ] ; then
+    # Check if we should wake up before the next timer:
+    if [ "$ACPI_REGULAR_DAYS" != "0" ] ; then
         REGULAR_TIMER=$(date -d "$ACPI_REGULAR_TIME" +%s)
         if [ "$REGULAR_TIMER" -lt "$(date +%s)" ] ; then
             REGULAR_TIMER=$(( REGULAR_TIMER + 24 * 60 * 60))
@@ -129,7 +115,7 @@ if [ $ACPI_ENABLED = "yes" ]; then
             TIMER=$REGULAR_TIMER
         fi
     fi
-    if [ $TIMER -gt 0 ]; then
+    if [ $TIMER -gt 0 ] ; then
         MIN_START_AHEAD=$(($(date +%s) + (60 * ACPI_START_AHEAD) ))
         if [ $MIN_START_AHEAD -gt $TIMER ]; then
             $LOG "Can not set wakeup time less than $ACPI_START_AHEAD minutes ahead."
@@ -137,11 +123,11 @@ if [ $ACPI_ENABLED = "yes" ]; then
             exit 1
         fi
 
-        # adjust wakeup time by ACPI_START_AHEAD
-    TIMER=$(( TIMER - (60 * ACPI_START_AHEAD) ))
+        # Adjust wakeup time by ACPI_START_AHEAD
+        TIMER=$(( TIMER - (60 * ACPI_START_AHEAD) ))
     fi
 
-    if [ $TIMER -eq 0 ]; then
+    if [ $TIMER -eq 0 ] ; then
         ResetWakeupTime
     else
         SetWakeupTime "$TIMER"
