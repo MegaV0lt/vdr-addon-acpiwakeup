@@ -10,7 +10,11 @@
 
 ### Functions ###
 LOG() {
-    [ -z "$TESTWAKEUP" ] && logger -t '[vdr-addon-acpiwakeup]' "$@"
+    if [ -z "$TESTWAKEUP" ] ; then 
+        logger -t '[vdr-addon-acpiwakeup]' "$*"
+    else
+        [ -t 1 ] && echo "[vdr-addon-acpiwakeup] $*"
+    fi
 }
 
 AcpiError() {
