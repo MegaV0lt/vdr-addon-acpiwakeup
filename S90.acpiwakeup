@@ -8,35 +8,13 @@
 # ACPI.
 #
 
-if [ "$(basename "$0")" != 'testwakeup' ] ; then
-    # Read arguments for acpi-wakeup from conf-file
-    . /etc/vdr/vdr-addon-acpiwakeup.conf
-    WAKEUP_FILE='/var/cache/vdr/acpiwakeup.time'
-    LOG='logger -t [vdr-addon-acpiwakeup]'
-else
-    # This variable is assigned to itself, so the assignment does nothing.
-    # WAKEUP_FILE=$WAKEUP_FILE
-    LOG='nop'
-fi
-
-nop() {  # No Operation
-    echo -n ""
+### Functions ###
+LOG() {
+    [ -z "$TESTWAKEUP" ] && logger -t '[vdr-addon-acpiwakeup]' "$@"
 }
 
-# Defaults:
-[ -z "$ACPI_ENABLED" ]          && export ACPI_ENABLED='yes'
-[ -z "$ACPI_MAX_MARGIN_HOURS" ] && export ACPI_MAX_MARGIN_HOURS=0
-[ -z "$ACPI_REGULAR_DAYS" ]     && export ACPI_REGULAR_DAYS=0
-[ -z "$ACPI_REGULAR_TIME" ]     && export ACPI_REGULAR_TIME='00:00'
-[ -z "$ACPI_START_AHEAD" ]      && export ACPI_START_AHEAD=5
-[ -z "$WAKEALARM" ]             && export WAKEALARM='/sys/class/rtc/rtc0/wakealarm'
-NEXT_TIMER='(timer)'
-
-TIMER="$1"  # Next timer in seconds since 1970-01-01 00:00:00 UTC, or 0 if no timer
-NOW=$(date +%s)  # Current time in seconds since 1970-01-01 00:00:00 UTC
-
 AcpiError() {
-    $LOG "ERROR: No writeable $WAKEALARM found. RTC needed!"
+    LOG "ERROR: No writeable $WAKEALARM found. RTC needed!"
     echo "ABORT_MESSAGE=\"RTC not writable, shutdown aborted!\""
     exit 1
 }
@@ -44,10 +22,10 @@ AcpiError() {
 
 ResetWakeupTime_RTC() {
     if [ -w "$WAKEALARM" ] ; then
-        $LOG "Writing 0 to $WAKEALARM"
+        LOG "Writing 0 to $WAKEALARM"
         echo 0 > "$WAKEALARM" && return 0
     else
-        $LOG "ERROR: WAKEALARM $WAKEALARM not writable"
+        LOG "ERROR: WAKEALARM $WAKEALARM not writable"
     fi
     return 1
 }
@@ -56,7 +34,7 @@ SetWakeupTime_RTC() {
     local -i ts="$1"
     if [ -w "$WAKEALARM" ] && ResetWakeupTime ; then
             wakeup_offset="+$((ts - NOW))"
-            $LOG "Writing $wakeup_offset $NEXT_TIMER to $WAKEALARM"
+            LOG "Writing $wakeup_offset $NEXT_TIMER to $WAKEALARM"
             # We use a relative time because of a bug with absolute
             # time and local vs. UTC timing, and avoid the handling of offsets
             echo "$wakeup_offset" > "$WAKEALARM" 2>/dev/null && return 0
@@ -65,12 +43,12 @@ SetWakeupTime_RTC() {
 }
 
 ResetWakeupTime() {
-    $LOG 'Resetting ACPI alarm time'
+    LOG 'Resetting ACPI alarm time'
     ResetWakeupTime_RTC || AcpiError
 }
 
 SetWakeupTime() {
-    $LOG "Try setting ACPI alarm time to: $(date -d@"$1") ($1)"
+    LOG "Try setting ACPI alarm time to: $(date -d@"$1") ($1)"
     if SetWakeupTime_RTC "$1" ; then
         echo "$1" > "$WAKEUP_FILE"
     else
@@ -81,7 +59,7 @@ SetWakeupTime() {
         for d in "${dates[@]}" ; do
 	        new_date=$(date -d "$d" +%s)
             [ "$1" -lt "$new_date" ] && continue
-	        $LOG "RTC did not accept $1, try setting ACPI alarm time to: $(date -d@"$new_date") ($new_date)"
+	        LOG "RTC did not accept $1, try setting ACPI alarm time to: $(date -d@"$new_date") ($new_date)"
             if SetWakeupTime_RTC "$new_date" ; then
                 # Remember wakeup time for stop script
                 echo "$new_date" >"$WAKEUP_FILE"
@@ -100,6 +78,30 @@ IsRegularDayOfWeek() {
     return 1
 }
 
+### Main ###
+if [ "$(basename "$0")" != 'testwakeup' ] ; then
+    # Read arguments for acpi-wakeup from conf-file
+    . /etc/vdr/vdr-addon-acpiwakeup.conf
+    WAKEUP_FILE='/var/cache/vdr/acpiwakeup.time'
+else
+    # This variable is assigned to itself, so the assignment does nothing.
+    # WAKEUP_FILE=$WAKEUP_FILE
+    TESTWAKEUP='true'
+fi
+
+# Defaults for variables:
+[ -z "$ACPI_ENABLED" ]          && export ACPI_ENABLED='yes'
+[ -z "$ACPI_MAX_MARGIN_HOURS" ] && export ACPI_MAX_MARGIN_HOURS=0
+[ -z "$ACPI_REGULAR_DAYS" ]     && export ACPI_REGULAR_DAYS=0
+[ -z "$ACPI_REGULAR_TIME" ]     && export ACPI_REGULAR_TIME='00:00'
+[ -z "$ACPI_START_AHEAD" ]      && export ACPI_START_AHEAD=5
+[ -z "$WAKEALARM" ]             && export WAKEALARM='/sys/class/rtc/rtc0/wakealarm'
+NEXT_TIMER='(timer)'  # Type of the next timer
+
+TIMER="$1"  # Next timer in seconds since 1970-01-01 00:00:00 UTC, or 0 if no timer
+NOW=$(date +%s)  # Current time in seconds since 1970-01-01 00:00:00 UTC
+
+
 if [ "$ACPI_ENABLED" = 'yes' ] ; then
     # Check if we should wake up before the next timer
     if [ "$ACPI_REGULAR_DAYS" != '0' ] ; then
@@ -114,7 +116,7 @@ if [ "$ACPI_ENABLED" = 'yes' ] ; then
         # if [ "$TIMER" -eq 0 ] || [ "$TIMER" -gt 0 -a "$REGULAR_TIMER" -lt "$TIMER" ] ; then
         # This is equivalent to the original condition, but it eliminates the need for the -gt 0 check,
         # since the -lt check will only be true if $TIMER is greater than 0
-        if [ "$TIMER" -eq 0 ] || [ "$REGULAR_TIMER" -lt "$TIMER" ]; then
+        if [ "$TIMER" -eq 0 ] || [ "$REGULAR_TIMER" -lt "$TIMER" ] ; then
             TIMER="$REGULAR_TIMER"
             NEXT_TIMER='(regular day)'
         fi
@@ -132,7 +134,7 @@ if [ "$ACPI_ENABLED" = 'yes' ] ; then
     if [ "$TIMER" -gt 0 ] ; then
         MIN_START_AHEAD=$((NOW + (60 * ACPI_START_AHEAD)))
         if [ "$MIN_START_AHEAD" -gt "$TIMER" ] ; then
-            $LOG "Can not set wakeup time less than $ACPI_START_AHEAD minutes ahead."
+            LOG "Can not set wakeup time less than $ACPI_START_AHEAD minutes ahead."
             echo "ABORT_MESSAGE=\"Wakeup in less than $ACPI_START_AHEAD minutes, aborting!\""
             exit 1
         fi
@@ -148,5 +150,5 @@ if [ "$ACPI_ENABLED" = 'yes' ] ; then
     fi
 
 else
-    $LOG 'ACPIWakeup functionality is disabled'
+    LOG 'ACPIWakeup functionality is disabled'
 fi
